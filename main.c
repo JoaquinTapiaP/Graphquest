@@ -39,6 +39,8 @@ typedef struct Escenario {
 } Escenario;
 
 Escenario* buscarEscenarioPorId(List* escenarios, int id) {
+    //busca la id en la lista de escenarios, si la encuentra, la devuelve.
+    //Sino, devuelve NULL
     for (Escenario* esc = list_first(escenarios); esc != NULL; esc = list_next(escenarios)) {
         if (esc->id == id)
             return esc;
@@ -46,10 +48,14 @@ Escenario* buscarEscenarioPorId(List* escenarios, int id) {
     return NULL;
 }
 
-void vincularEscenarios(List* escenarios) {    
+void vincularEscenarios(List* escenarios) {  
+    //Obtiene el tamaño de la lista de escenarios  
     int total = list_size(escenarios);
+    
+    //Por cada escenario revisa si su ID de coneccion es distinta a -1, si lo es, obtiene el escnario
+    //Y lo conecta a los lados del escenario
     for (int i = 1; i <= total; i++) {
-        Escenario* esc = buscarEscenarioPorId(escenarios, i); // Usar list_get si existe
+        Escenario* esc = buscarEscenarioPorId(escenarios, i);
         if (esc == NULL) {
             printf("Elemento %d es NULL\n", i);
             continue;
@@ -79,6 +85,7 @@ List* leer_escenarios() {
     campos = leer_linea_csv(archivo, ','); // Lee los encabezados del CSV
 
     // Lee cada línea del archivo CSV hasta el final
+    // Y lo asigna a su lugar correspondiente
     while ((campos = leer_linea_csv(archivo, ',')) != NULL) {
         Escenario* esc = malloc(sizeof(Escenario));
         esc->items = list_create();
@@ -127,6 +134,7 @@ List* leer_escenarios() {
 }
 
 void mostrarEstadoJugador(Escenario* EscenarioActual, Jugador* perfil, int tiempo){
+    //Muestra todos los estados actuales del jugador, cambia dependiendo de lo hecho anteriormente
     puts("========================================");
     puts("              GraphQuest");
     puts("========================================");
@@ -205,6 +213,7 @@ void mostrarEstadoJugador(Escenario* EscenarioActual, Jugador* perfil, int tiemp
 }
 
 void mostrarMenuPrincipal() {
+    //muestra las opciones
     puts("========================================");
     puts("1.- Recoger Ítem");
     puts("2.- Descartar Ítem");
@@ -214,6 +223,8 @@ void mostrarMenuPrincipal() {
 }
 
 int calcularPesoInventario(Jugador* perfil) {
+    //pasa por toda la lista de objetos, y suma a una variable todos los valores peso de los objetos
+    //Y devuelve el resultado final
     int peso_total = 0;
     Item* item = list_first(perfil->inventario);
     while (item != NULL) {
@@ -224,28 +235,41 @@ int calcularPesoInventario(Jugador* perfil) {
 }
 
 void RecogerItem(Jugador* perfil, Escenario* EscenarioActual) {
+    //Si no hay objetos, muestra que no hay nada y retorna al menu principal
     if (list_first(EscenarioActual->items) == NULL) {
         printf("No hay items en esta habitación\n");
         return;
     }
 
-    printf("Items disponibles en esta habitación:\n");
+    //Muestra el formato
+    printf("\nItems disponibles en esta habitación:\n");
+    printf("%-3s | %-25s | %-5s | %-5s\n", "#", "Nombre", "Peso", "Valor");
+    printf("----------------------------------------------\n");
+
+    //Muestra la lista de todos los objetos ennumerados
     int index = 1;
     Item* item = list_first(EscenarioActual->items);
     while (item != NULL) {
-        printf("%d. %s\n", index, item->nombre);
+        printf("%-3d | %-25s | %-5d | %-5d\n", 
+               index, 
+               item->nombre, 
+               item->peso, 
+               item->puntos);
         item = list_next(EscenarioActual->items);
         index++;
     }
 
+    //obtiene el valor, y se itera hasta encontrarlo, luego se añade a la lista del inventario del jugador
     int eleccion;
-    printf("Ingresa el número del ítem que deseas recoger: ");
+    printf("\nIngresa el número del ítem que deseas recoger: ");
     scanf("%d", &eleccion);
 
+    //Si la opcion no es valida, retorna al menu principal
     if (eleccion < 1 || eleccion >= index) {
         printf("Selección inválida\n");
         return;
     }
+
 
     // Volver a recorrer para ubicar el ítem
     int contador = 1;
@@ -271,15 +295,18 @@ void RecogerItem(Jugador* perfil, Escenario* EscenarioActual) {
 }
 
 void DescartarItem(Jugador* perfil, Escenario* EscenarioActual) {
+    //Si el inventario esta vacio, avisa y devuelve al jugador al menu principal
     if (list_size(perfil->inventario) == 0) {
         printf("No tienes ningún ítem para descartar.\n");
         return;
     }
 
+    //muestra el formato
     printf("Ítems en tu inventario:\n");
     printf("%-3s | %-20s | %-5s | %-6s\n", "#", "Nombre", "Peso", "Valor");
     printf("----------------------------------------------\n");
 
+    //muestra la lista de los objetos del inventario
     int index = 1;
     Item* item = list_first(perfil->inventario);
     while (item != NULL) {
@@ -292,6 +319,7 @@ void DescartarItem(Jugador* perfil, Escenario* EscenarioActual) {
     printf("Selecciona el número del ítem que deseas descartar: ");
     scanf("%d", &opcion);
 
+    //Si la opcion no es valida, retorna al menu principal
     if (opcion < 1 || opcion > list_size(perfil->inventario)) {
         printf("Opción inválida.\n");
         return;
@@ -308,24 +336,27 @@ void DescartarItem(Jugador* perfil, Escenario* EscenarioActual) {
     for (int i = 1; i <= opcion; i++) {
         item = list_next(perfil->inventario);
     }
-
+    // Volver a recorrer para ubicar el ítem
     Item* descartado = list_popCurrent(perfil->inventario);
 
-    // Devolver a la habitación
+    // Coloca el objeto tirado a la habitación actual
     list_pushBack(EscenarioActual->items, descartado);
 
+    //Quita 1 de tiempo al tirar un objeto
     limpiarPantalla();
     printf("Has descartado '%s'.\n", descartado->nombre);
     perfil->tiempo--;
 }
 
 void AvanzarEnDireccion(Jugador* perfil, Escenario* EscenarioActual) {
+    
     printf("Movimientos posibles desde esta habitación:\n");
     if (EscenarioActual == NULL) {
         printf("Error: EscenarioActual es NULL.\n");
         return;
     }
 
+    //Muestra todoas las posibles opciones de movimiento conectadas, segun la IDDireccional
     if (EscenarioActual->id_arriba != -1)
         printf("↑ Arriba - %s\n", EscenarioActual->arriba->nombre);
     if (EscenarioActual->id_abajo != -1)
@@ -337,10 +368,12 @@ void AvanzarEnDireccion(Jugador* perfil, Escenario* EscenarioActual) {
 
     printf("¿En que direccion te dirigiras?\n");
     
+
     char input[20];
     scanf("%19s", input);
     getchar();
 
+    //Ignora mayusculas y compara, si son iguales, se justifica destino, sinó se queda NULL
     Escenario* destino = NULL;
     if (strcasecmp(input, "arriba") == 0) {
         destino = EscenarioActual->arriba;
@@ -407,7 +440,7 @@ void ReiniciarPartida(Jugador* perfil, List** escenarios) {
 int verificarEstadoJuego(Jugador* perfil, List** escenarios, Escenario** EscenarioActual) {
     // Verificar si ya estamos en estado final
 
-    printf("\nDEBUG: Escenario %d - Final: %s\n", (*EscenarioActual)->id, (*EscenarioActual)->es_final);
+    //printf("\nDEBUG: Escenario %d - Final: %s\n", (*EscenarioActual)->id, (*EscenarioActual)->es_final);
 
     if (strcasecmp((*EscenarioActual)->es_final, "si") == 0) {
         limpiarPantalla();
@@ -506,7 +539,6 @@ int main() {
             case 1: // Recoger Ítem
                 limpiarPantalla();
                 RecogerItem(perfil, EscenarioActual);
-
                 //printf("Recojo Item");
                 break;
             case 2: //Descartar Ítem
@@ -517,7 +549,6 @@ int main() {
             case 3: //Avanzar en una Dirección
                 limpiarPantalla();
                 AvanzarEnDireccion(perfil, EscenarioActual);
-
                 //printf("Avanzo en una direccion");
                 break;
             case 4: //Reiniciar Partida
