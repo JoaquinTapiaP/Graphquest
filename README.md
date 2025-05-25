@@ -28,7 +28,7 @@ Este sistema ha sido desarrollado en lenguaje C y puede ejecutarse fácilmente u
     - Abre la terminal integrada (`Terminal > Nueva terminal`).
     - En la terminal Git Bash, compila el programa con el siguiente comando: 
     ```
-    gcc  main.c list.c map.c extra.c -Wno-unused-result -o Graphquest
+    gcc  main.c list.c extra.c -Wno-unused-result -o Graphquest
     ```
 4. **Ejecuta el programa**
     - Una vez compilado, puedes ejecutar la aplicación con:
@@ -40,13 +40,11 @@ Este sistema ha sido desarrollado en lenguaje C y puede ejecutarse fácilmente u
 
 ### Funcionando correctamente:
 
-- Cargar la base de datos de las canciones desde un archivo .csv (En vez de mostrar las 10000 canciones, se muestran las primeras 100 para que no colapse la terminal).
-- Buscar y mostrar todas las canciones del genero que se busque.
-- Buscar y mostrar todas las canciones del artista que se busque.
-- Buscar y mostrar todas las canciones de cierto tempo en base a Lento siendo menor a 80 BPM, Moderado siendo de 80 BPM a 120 BPM y Rápidas siendo mayor que 120 BPM.
-- Crear una lista de reproducción vacia con nombre customizable.
-- Agregar una cancion a una lista de reproduccion en base al ID de la cancion.
-- Mostrar todas las canciones de una lista de reproduccion
+- Cargar la base de datos del desde un archivo .csv
+- Recoger items de la habitacion.
+- Descartar objetos del inventario.
+- Moverte en direcciones válida.
+- Reiniciar la partida desde 0.
 
 ### Problemas conocidos:
 
