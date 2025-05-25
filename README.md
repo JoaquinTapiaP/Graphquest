@@ -108,6 +108,6 @@ El programa se reseta, se devuelven los items a su lugar, el jugador vuelve a la
 **Paso 5: Salir**
 El usuario desea salir del programa.
 ```
-Opción Seleccionada: 6) Salir
+Opción Seleccionada: 5) Salir
 ```
 El programa se termina y elimina la informacion.
